@@ -1,0 +1,33 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>ros_adas2019</name>
+  <version>1.0.0</version>
+  <description>The ros_adas2019 package</description>
+
+  <!-- One maintainer tag required, multiple allowed, one person per tag -->
+  <maintainer email="aadc@fh-wedel.de">ros-aadc</maintainer>
+
+  <license>GPLv3</license>
+
+  <!-- Author tags are optional, multiple are allowed, one per tag -->
+  <author>Franz Wernicke</author>
+  <author>Felix Maaß</author>
+
+  <depend>roscpp</depend>
+  <depend>std_msgs</depend>
+  <depend>geometry_msgs</depend>
+  <depend>dynamic_reconfigure</depend>
+
+  <buildtool_depend>catkin</buildtool_depend>
+  
+  <build_depend>message_generation</build_depend>
+  <exec_depend>message_runtime</exec_depend>
+  
+
+
+  <!-- The export tag contains other, unspecified, tags -->
+  <export>
+    <!-- Other tools can request additional information be placed here -->
+
+  </export>
+</package>

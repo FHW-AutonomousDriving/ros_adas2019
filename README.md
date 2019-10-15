@@ -1,21 +1,21 @@
 # ROS Package for the ADAS Model Car
 
-This package provides basic functionality for sensor input and actuator output for the Model Car which ought to be used in the AADC 2019.
+This package provides basic functionality for sensor input and actuator output for the Model Car which has been used in the AADC 2018.
 
 The Interface includes communication with the following periphery:
 
+- Actuator Control (Speed, Steering and Light)
 - Ultrasonic Sensors (sideways and rear)
 - Inertial Measurement Unit
 - Wheel Encoder (left and right)
+- Battery Sensors (overall and per cell voltage)
 
 ----
 
-Additionally this project may be extended to support:
+Additionally this project provides support for:
 
 - the Basler front camera
-- the rear camera
 - the front-facing LIDAR unit
-
 
 ----
 

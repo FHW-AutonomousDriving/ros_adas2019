@@ -123,7 +123,7 @@ devel/
 logs/
 build/
 bin/
-lib/
+/lib/
 msg_gen/
 srv_gen/
 msg/*Action.msg
@@ -198,3 +198,5 @@ $RECYCLE.BIN/
 
 # End of https://www.gitignore.io/api/c,c++,ros,linux,macos,windows
 
+cmake-build-debug
+.idea
