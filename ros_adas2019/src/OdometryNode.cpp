@@ -42,17 +42,33 @@ void OdometryNode::onDataReceived(SENSOR_ID sensorId, uint32_t timestamp, tDataU
 }
 
 
-
 double OdometryNode::calculateDistance(uint32_t wheelTach, uint32_t lastWheelTach) {
     if ((wheelTach == 0) || (lastWheelTach == 0)) return 0;
+
+
+    uint32_t ticks;
+    if (wheelTach < lastWheelTach) {
+        // the tachometers will overflow after some time
+        ticks = UINT32_MAX - lastWheelTach + wheelTach;
+    } else {
+        ticks = wheelTach - lastWheelTach;
+    }
     //                  circumference
     // distance = -------------------------- * [ticks since last trigger]
     //              [ticks per revolution]
-    return (double) (wheelTach - lastWheelTach) * config.wheel_circumference / config.encoder_ticks_per_revolution;
+    return (double) ticks * config.wheel_circumference / config.encoder_ticks_per_revolution;
 }
 
 double OdometryNode::calculateSpeed(uint32_t timestamp, uint32_t lastTimestamp, double distance) {
-    double timeDiff = (double) (timestamp - lastTimestamp) / 1e6;
+    uint32_t timeTicks;
+    if (timestamp < lastTimestamp) {
+        // the timestamps will overflow after some time
+        timeTicks = UINT32_MAX - lastTimestamp + timestamp;
+    } else {
+        timeTicks = timestamp - lastTimestamp;
+    }
+
+    double timeDiff = (double) (timeTicks) / 1e6;
     // return if time difference is 0, if time difference is smaller than 0, if ticks are 0 or smaller 0
     if (timeDiff == 0) return 0;
     //           distance
@@ -90,7 +106,8 @@ void OdometryNode::updateOdometryWheelEncoder(SENSOR_ID sensorId, uint32_t times
                 // calculate distance and afterwards
                 // calculate the speed and take account for the direction in which we are moving
                 double distanceLeft = calculateDistance(wheelData.ui32WheelTach, lastWheelDataLeft.ui32WheelTach);
-                double wheelSpeedLeft = calculateSpeed(timestamp, lastTimestampLeft, distanceLeft) * (isMovingForward ? 1 : -1);
+                double wheelSpeedLeft =
+                        calculateSpeed(timestamp, lastTimestampLeft, distanceLeft) * (isMovingForward ? 1 : -1);
                 totalDistanceLeft += distanceLeft;
                 lastWheelSpeedLeft = wheelSpeedLeft;
 
@@ -117,7 +134,8 @@ void OdometryNode::updateOdometryWheelEncoder(SENSOR_ID sensorId, uint32_t times
                 // calculate distance and afterwords
                 // calculate the speed and take account for the direction in which we are moving
                 double distanceRight = calculateDistance(wheelData.ui32WheelTach, lastWheelDataRight.ui32WheelTach);
-                double wheelSpeedRight = calculateSpeed(timestamp, lastTimestampRight, distanceRight) * (isMovingForward ? 1 : -1);
+                double wheelSpeedRight =
+                        calculateSpeed(timestamp, lastTimestampRight, distanceRight) * (isMovingForward ? 1 : -1);
                 totalDistanceRight += distanceRight;
                 lastWheelSpeedRight = wheelSpeedRight;
 
@@ -173,7 +191,7 @@ void callback(ros_adas2019::OdometryConfig &new_config, uint32_t level) {
 //  ROS_INFO("OdometryConfig: \tencoder_ticks_per_revolution: %d |\twheel_circumference: %f",
 //           new_config.encoder_ticks_per_revolution, new_config.wheel_circumference);
 
-  config = new_config;
+    config = new_config;
 }
 
 
@@ -189,7 +207,7 @@ int main(int argc, char **argv) {
 
     ros::Rate poll_rate(120);
 
-    while(ros::ok()) {
+    while (ros::ok()) {
         ros::spinOnce();
         node.triggerUpdate();
 
