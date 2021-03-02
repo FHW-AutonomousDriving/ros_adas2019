@@ -97,14 +97,14 @@ bool arduino_com_client::start_reading(int arduino_id)
                 break;
             }
 
-            if (timer.elapsed() > TIMEOUT)
+            if (timer.elapsed() > ARDUINO_TIMEOUT)
             {
                 //end();
                 return false;
             }
         }
 
-        if (timer.elapsed() > TIMEOUT)
+        if (timer.elapsed() > ARDUINO_TIMEOUT)
         {
             //end();
             return false;
@@ -383,7 +383,7 @@ int arduino_com_client::_read_and_destuff_frame(std::vector<uint8_t>& frame)
             read_success = true;
         }
 
-        if (timer.elapsed() > TIMEOUT)
+        if (timer.elapsed() > ARDUINO_TIMEOUT)
         {
             // NO STX FOUND
             return ERROR_STX_NOT_FOUND;
@@ -410,7 +410,7 @@ int arduino_com_client::_read_and_destuff_frame(std::vector<uint8_t>& frame)
                 while (!_port.read(c))
                 {
                     boost::this_thread::sleep(boost::posix_time::milliseconds(5));
-                    if (timer.elapsed() > TIMEOUT)
+                    if (timer.elapsed() > ARDUINO_TIMEOUT)
                     {
                         // ESCAPE BYTE BREAK
                         return ERROR_ESC_BYTE_BROKEN;
@@ -431,7 +431,7 @@ int arduino_com_client::_read_and_destuff_frame(std::vector<uint8_t>& frame)
             }
         }
 
-        if (timer.elapsed() > TIMEOUT)
+        if (timer.elapsed() > ARDUINO_TIMEOUT)
         {
             // NO BYTES AVAILABLE
             return ERROR_NO_BYTES_AVAILABLE;

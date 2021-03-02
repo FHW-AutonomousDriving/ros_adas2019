@@ -29,7 +29,7 @@ THIS SOFTWARE IS PROVIDED BY AUDI AG AND CONTRIBUTORS AS IS AND ANY EXPRESS OR I
  */
 #define BUFFERSIZE 64
 /*! A macro that defines the timeout of the serial port if no arduino protocol is recognized. */
-#define TIMEOUT 3.0
+#define ARDUINO_TIMEOUT 3.0
 
 #if WIN32 //check all com ports...
 #define NUM_ARDUINO 100

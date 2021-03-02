@@ -1,7 +1,8 @@
 <?xml version="1.0"?>
-<package format="2">
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="3">
   <name>ros_adas2019</name>
-  <version>1.0.1</version>
+  <version>2.0.0</version>
   <description>The ros_adas2019 package</description>
 
   <!-- One maintainer tag required, multiple allowed, one person per tag -->
@@ -12,22 +13,18 @@
   <!-- Author tags are optional, multiple are allowed, one per tag -->
   <author>Franz Wernicke</author>
   <author>Felix Maaß</author>
+  <author>Hermann Höhne</author>
 
-  <depend>roscpp</depend>
+  <depend>rclcpp</depend>
   <depend>std_msgs</depend>
   <depend>geometry_msgs</depend>
-  <depend>dynamic_reconfigure</depend>
 
-  <buildtool_depend>catkin</buildtool_depend>
-  
-  <build_depend>message_generation</build_depend>
-  <exec_depend>message_runtime</exec_depend>
-  
+  <buildtool_depend>ament_cmake</buildtool_depend>
 
+  <test_depend>ament_lint_auto</test_depend>
+  <test_depend>ament_lint_common</test_depend>
 
-  <!-- The export tag contains other, unspecified, tags -->
   <export>
-    <!-- Other tools can request additional information be placed here -->
-
+    <build_type>ament_cmake</build_type>
   </export>
 </package>

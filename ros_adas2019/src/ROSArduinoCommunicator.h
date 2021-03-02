@@ -4,7 +4,9 @@
 #include "../lib/arduino/arduino_protocol.h"
 #include "../lib/arduino/arduino_com_client.h"
 
-class ROSArduinoCommunicator {
+#include "rclcpp/rclcpp.hpp"
+
+class ROSArduinoCommunicator : public rclcpp::Node {
 
 public:
     ROSArduinoCommunicator(ARDUINO_ID arduinoId);
