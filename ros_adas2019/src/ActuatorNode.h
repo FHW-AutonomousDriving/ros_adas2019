@@ -1,42 +1,36 @@
-//
-// Created by ros-aadc on 12.11.19.
-//
+#pragma once
 
-#ifndef ROS_ADAS2019_ACTUATORNODE_H
-#define ROS_ADAS2019_ACTUATORNODE_H
+#include <std_msgs/msg/bool.hpp>
+#include <std_msgs/msg/float32.hpp>
 
 #include "ROSArduinoCommunicator.h"
 
 class ActuatorNode : public ROSArduinoCommunicator {
 public:
 
-    ActuatorNode(ros::NodeHandle &nh);
+    ActuatorNode();
     ~ActuatorNode();
 
 private:
 
 
     u_char lightMask;
-    ros::Timer timer;
+    rclcpp::TimerBase::SharedPtr timer;
 
-    ros::Subscriber actuatorSpeedSubscriber;
-    ros::Subscriber actuatorSteeringSubscriber;
-    ros::Subscriber actuatorEmergencyStopSubscriber;
-    ros::Subscriber actuatorHeadLightsSubscriber;
-    ros::Subscriber actuatorBrakeLightsSubscriber;
-    ros::Subscriber actuatorReverseLightsSubscriber;
-    ros::Subscriber actuatorHazardLightsSubscriber;
-    ros::Subscriber actuatorIndicatorLeftSubscriber;
-    ros::Subscriber actuatorIndicatorRightSubscriber;
+    rclcpp::Subscription<std_msgs::msg::Float32>::SharedPtr actuatorSpeedSubscriber;
+    rclcpp::Subscription<std_msgs::msg::Float32>::SharedPtr actuatorSteeringSubscriber;
+    rclcpp::Subscription<std_msgs::msg::Bool>::SharedPtr actuatorEmergencyStopSubscriber;
+    rclcpp::Subscription<std_msgs::msg::Bool>::SharedPtr actuatorHeadLightsSubscriber;
+    rclcpp::Subscription<std_msgs::msg::Bool>::SharedPtr actuatorBrakeLightsSubscriber;
+    rclcpp::Subscription<std_msgs::msg::Bool>::SharedPtr actuatorReverseLightsSubscriber;
+    rclcpp::Subscription<std_msgs::msg::Bool>::SharedPtr actuatorHazardLightsSubscriber;
+    rclcpp::Subscription<std_msgs::msg::Bool>::SharedPtr actuatorIndicatorLeftSubscriber;
+    rclcpp::Subscription<std_msgs::msg::Bool>::SharedPtr actuatorIndicatorRightSubscriber;
 
-    std::function<void(const std_msgs::Bool::ConstPtr &)> sendLightFactory(u_char lightID);
-
-    void onSteeringUpdate(const std_msgs::Float32::ConstPtr &msg);
-    void onSpeedUpdate(const std_msgs::Float32::ConstPtr &msg);
-    void onEmergencyStopUpdate(const std_msgs::Bool::ConstPtr &msg);
-    void onWatchDogTimer(const ros::TimerEvent &);
+    std::function<void(const std_msgs::msg::Bool::SharedPtr)> sendLightFactory(u_char lightID);
+    void onSteeringUpdate(const std_msgs::msg::Float32::SharedPtr msg);
+    void onSpeedUpdate(const std_msgs::msg::Float32::SharedPtr msg);
+    void onEmergencyStopUpdate(const std_msgs::msg::Bool::SharedPtr msg);
+    void onWatchDogTimer();
     void onDataReceived(SENSOR_ID sensorId, uint32_t timestamp, tDataUnion data) override;
 };
-
-
-#endif //ROS_ADAS2019_ACTUATORNODE_H

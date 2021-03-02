@@ -1,52 +1,47 @@
-//
-// Created by  on 12.11.19.
-//
+#include <chrono>
 
-#include <ros/ros.h>
-#include <ros/timer.h>
-#include <std_msgs/Float32.h>
-#include <std_msgs/Bool.h>
-#include <cstdlib>
-
-#include "../lib/arduino/arduino_protocol.h"
 #include "ActuatorNode.h"
 
-ActuatorNode::ActuatorNode(ros::NodeHandle &nh) : ROSArduinoCommunicator(ARDUINO_CENTER_ACTUATORS) {
+ActuatorNode::ActuatorNode() : ROSArduinoCommunicator(ARDUINO_CENTER_ACTUATORS) {
 
     sendSteering(0.0);
     sendSpeed(0.0);
     sendLight(0); // light is off -> turn on using ID_ARD_ACT_LIGHT_MASK_<light>
 
-    actuatorSteeringSubscriber = nh.subscribe<std_msgs::Float32>("actuator/steering", 1, &ActuatorNode::onSteeringUpdate, this);
-    actuatorSpeedSubscriber = nh.subscribe<std_msgs::Float32>("actuator/speed", 1, &ActuatorNode::onSpeedUpdate, this);
+    actuatorSpeedSubscriber = this->create_subscription<std_msgs::msg::Float32>("actuator/speed", 1, 
+		std::bind(&ActuatorNode::onSpeedUpdate, this, std::placeholders::_1)
+    );
+    actuatorSteeringSubscriber = this->create_subscription<std_msgs::msg::Float32>("actuator/steering", 1, 
+		std::bind(&ActuatorNode::onSteeringUpdate, this, std::placeholders::_1)
+    );
 
-    actuatorHeadLightsSubscriber = nh.subscribe<std_msgs::Bool>("lights/head", 1, ActuatorNode::sendLightFactory(ID_ARD_ACT_LIGHT_MASK_HEAD));
-    actuatorBrakeLightsSubscriber = nh.subscribe<std_msgs::Bool>("lights/brake", 1, ActuatorNode::sendLightFactory(ID_ARD_ACT_LIGHT_MASK_BRAKE));
-    actuatorReverseLightsSubscriber = nh.subscribe<std_msgs::Bool>("lights/reverse", 1, ActuatorNode::sendLightFactory(ID_ARD_ACT_LIGHT_MASK_REVERSE));
-    actuatorHazardLightsSubscriber = nh.subscribe<std_msgs::Bool>("lights/hazard", 1, ActuatorNode::sendLightFactory(ID_ARD_ACT_LIGHT_MASK_HAZARD));
-    actuatorIndicatorLeftSubscriber = nh.subscribe<std_msgs::Bool>("lights/indicator_left", 1, ActuatorNode::sendLightFactory(ID_ARD_ACT_LIGHT_MASK_TURNLEFT));
-    actuatorIndicatorRightSubscriber = nh.subscribe<std_msgs::Bool>("lights/indicator_right", 1, ActuatorNode::sendLightFactory(ID_ARD_ACT_LIGHT_MASK_TURNRIGHT));
+    actuatorHeadLightsSubscriber = this->create_subscription<std_msgs::msg::Bool>("lights/head", 1, ActuatorNode::sendLightFactory(ID_ARD_ACT_LIGHT_MASK_HEAD));
+    actuatorBrakeLightsSubscriber = this->create_subscription<std_msgs::msg::Bool>("lights/brake", 1, ActuatorNode::sendLightFactory(ID_ARD_ACT_LIGHT_MASK_BRAKE));
+    actuatorReverseLightsSubscriber = this->create_subscription<std_msgs::msg::Bool>("lights/reverse", 1, ActuatorNode::sendLightFactory(ID_ARD_ACT_LIGHT_MASK_REVERSE));
+    actuatorHazardLightsSubscriber = this->create_subscription<std_msgs::msg::Bool>("lights/hazard", 1, ActuatorNode::sendLightFactory(ID_ARD_ACT_LIGHT_MASK_HAZARD));
+    actuatorIndicatorLeftSubscriber = this->create_subscription<std_msgs::msg::Bool>("lights/indicator_left", 1, ActuatorNode::sendLightFactory(ID_ARD_ACT_LIGHT_MASK_TURNLEFT));
+    actuatorIndicatorRightSubscriber = this->create_subscription<std_msgs::msg::Bool>("lights/indicator_right", 1, ActuatorNode::sendLightFactory(ID_ARD_ACT_LIGHT_MASK_TURNRIGHT));
 
-    actuatorEmergencyStopSubscriber = nh.subscribe<std_msgs::Bool>("actuator/emergency_stop", 1, &ActuatorNode::onEmergencyStopUpdate, this);
+    actuatorEmergencyStopSubscriber = this->create_subscription<std_msgs::msg::Bool>("actuator/emergency_stop", 1, 
+		std::bind(&ActuatorNode::onEmergencyStopUpdate, this, std::placeholders::_1)
+	);
 
-    timer = nh.createTimer(ros::Duration(0.1), &ActuatorNode::onWatchDogTimer, this);
+    timer = this->create_wall_timer(std::chrono::milliseconds(100), std::bind(&ActuatorNode::onWatchDogTimer, this));
 }
 
 ActuatorNode::~ActuatorNode() {
 }
 
 int main(int argc, char **argv) {
-    //Initializes ROS, and sets up a node
-    ros::init(argc, argv, "adas_2019");
-    ros::NodeHandle nh;
-    ActuatorNode node(nh);
-
-    ros::spin();
+    rclcpp::init(argc, argv);
+	rclcpp::spin(std::make_shared<ActuatorNode>());
+	rclcpp::shutdown();
 }
 
-std::function<void(const std_msgs::Bool::ConstPtr &)> ActuatorNode::sendLightFactory(u_char lightID) {
-    return [this, lightID](const std_msgs::Bool::ConstPtr &b) {
-        ROS_DEBUG("Recieved Light for %d with value %d", lightID, b->data);
+
+std::function<void(const std_msgs::msg::Bool::SharedPtr)> ActuatorNode::sendLightFactory(u_char lightID) {
+    return [this, lightID](const std_msgs::msg::Bool::SharedPtr b) {
+        RCLCPP_DEBUG(this->get_logger(), "Recieved Light for %d with value %d", lightID, b->data);
 
         if (lightID == ID_ARD_ACT_LIGHT_MASK_TURNLEFT) {
             lightMask &= ~ID_ARD_ACT_LIGHT_MASK_TURNRIGHT;
@@ -67,28 +62,32 @@ std::function<void(const std_msgs::Bool::ConstPtr &)> ActuatorNode::sendLightFac
     };
 }
 
-void ActuatorNode::onSteeringUpdate(const std_msgs::Float32::ConstPtr &msg) {
-    ROS_DEBUG("I heard steering: [%f]", msg->data);
+void ActuatorNode::onSteeringUpdate(const std_msgs::msg::Float32::SharedPtr msg) {
+	RCLCPP_DEBUG(this->get_logger(),
+		"I heard steering: [%f]", msg->data
+    );
     sendSteering(msg->data);
 }
 
-void ActuatorNode::onSpeedUpdate(const std_msgs::Float32::ConstPtr &msg) {
-    ROS_DEBUG("I heard speed: [%f]", msg->data);
+void ActuatorNode::onSpeedUpdate(const std_msgs::msg::Float32::SharedPtr msg) {
+	RCLCPP_DEBUG(this->get_logger(),
+		"I heard speed: [%f]", msg->data
+    );
     sendSpeed(msg->data);
 }
 
 /// NOTE: Emergency Stop cannot be undone!
-void ActuatorNode::onEmergencyStopUpdate(const std_msgs::Bool::ConstPtr &msg) {
+void ActuatorNode::onEmergencyStopUpdate(const std_msgs::msg::Bool::SharedPtr msg) {
     if (msg->data) {
         sendEmergencyStop();
-        ROS_WARN("Emergency Stop activated!");
+        RCLCPP_WARN(this->get_logger(),"Emergency Stop activated!");
     } else {
-        ROS_INFO("Emergency Stop cannot be undone!");
+        RCLCPP_INFO(this->get_logger(),"Emergency Stop cannot be undone!");
     }
 }
 
-void ActuatorNode::onWatchDogTimer(const ros::TimerEvent &) {
+void ActuatorNode::onWatchDogTimer() {
     sendWatchdog();
 }
 
-void ActuatorNode::onDataReceived(SENSOR_ID sensorId, uint32_t timestamp, tDataUnion data) {}
+void ActuatorNode::onDataReceived(SENSOR_ID, uint32_t, tDataUnion) {}

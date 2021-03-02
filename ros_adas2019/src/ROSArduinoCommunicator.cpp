@@ -1,16 +1,17 @@
-//
-// Created by ros-aadc on 12.11.19.
-//
-
-#include <ros/ros.h>
 #include "ROSArduinoCommunicator.h"
 
-ROSArduinoCommunicator::ROSArduinoCommunicator(ARDUINO_ID arduinoId) {
+ROSArduinoCommunicator::ROSArduinoCommunicator(ARDUINO_ID arduinoId) : rclcpp::Node::Node("ROS2TODO"/*"adas_2019"*/) {
     if (!arduinoComClient.init(arduinoId, SERIAL_DEVICE_PREFIX, NUM_ARDUINO)) {
-        // TODO: Throw exception
+        RCLCPP_ERROR(this->get_logger(),
+			"Unable to find arduino with id %d.",
+			 arduinoId
+		);
+        throw std::runtime_error("Unable to connect to arduino.");
     } else {
-        ROS_INFO("Connected to arduino on port:\t\t\t%d\t ID: %d\t Software version: %d",
-                 arduinoComClient.get_port_num(), arduinoComClient.get_id(), arduinoComClient.get_software_version());
+        RCLCPP_INFO(this->get_logger(),
+			"Connected to arduino on port:\t\t\t%d\t ID: %d\t Software version: %d",
+			 arduinoComClient.get_port_num(), arduinoComClient.get_id(), arduinoComClient.get_software_version()
+		);
     }
 }
 
@@ -35,17 +36,21 @@ void ROSArduinoCommunicator::triggerUpdate() {
 
         switch (id) {
             case ID_ARD_SENSOR_INFO:
-                ROS_INFO("Info frame received.\tID: %u\tSoftware version: %u", data.info.ui8ArduinoAddress,
-                         data.info.ui16ArduinoVersion);
-                break;
+				RCLCPP_INFO(this->get_logger(),
+					"Info frame received.\tID: %u\tSoftware version: %u", data.info.ui8ArduinoAddress,
+					 data.info.ui16ArduinoVersion
+				);
+            break;
 
             case ID_ARD_SENS_ERROR:
-                ROS_ERROR("Error frame received from unit: %d", arduinoComClient.get_id());
-                break;
+				RCLCPP_ERROR(this->get_logger(),
+					"Error frame received from unit: %d", arduinoComClient.get_id()
+				);
+			break;
 
             default:
                 onDataReceived(id, timestamp, data);
-                break;
+			break;
         }
     }
 }
