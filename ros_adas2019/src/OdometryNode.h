@@ -1,27 +1,28 @@
-//
-// Created by ros-aadc on 12.11.19.
-//
+#pragma once
 
-#ifndef ROS_ADAS2019_ODOMETRYNODE_H
-#define ROS_ADAS2019_ODOMETRYNODE_H
+#include <ros_adas2019/msg/imu.hpp>
+#include <std_msgs/msg/float32.hpp>
 
 #include "ROSArduinoCommunicator.h"
 
-class OdometryNode: public ROSArduinoCommunicator {
+class OdometryNode : public ROSArduinoCommunicator {
 public:
 
-    OdometryNode(ros::NodeHandle &nh);
+    OdometryNode();
+    ~OdometryNode();
 
 private:
 
-    ros::Publisher odometryIMUPublisher;
-    ros::Publisher odometryOverallSpeedPublisher;
-    ros::Publisher odometryOverallDistancePublisher;
-    ros::Publisher odometryLeftWheelSpeedPublisher;
-    ros::Publisher odometryLeftWheelDistancePublisher;
-    ros::Publisher odometryRightWheelSpeedPublisher;
-    ros::Publisher odometryRightWheelDistancePublisher;
+    rclcpp::Publisher<ros_adas2019::msg::Imu>::SharedPtr odometryIMUPublisher;
+    rclcpp::Publisher<std_msgs::msg::Float32>::SharedPtr odometryOverallSpeedPublisher;
+    rclcpp::Publisher<std_msgs::msg::Float32>::SharedPtr odometryOverallDistancePublisher;
+    rclcpp::Publisher<std_msgs::msg::Float32>::SharedPtr odometryLeftWheelSpeedPublisher;
+    rclcpp::Publisher<std_msgs::msg::Float32>::SharedPtr odometryLeftWheelDistancePublisher;
+    rclcpp::Publisher<std_msgs::msg::Float32>::SharedPtr odometryRightWheelSpeedPublisher;
+    rclcpp::Publisher<std_msgs::msg::Float32>::SharedPtr odometryRightWheelDistancePublisher;
 
+	rcl_interfaces::msg::SetParametersResult onParameterChange(const std::vector<rclcpp::Parameter> & parameters);
+	std::vector<rclcpp::Parameter> parameters;
 
     void onDataReceived(SENSOR_ID sensorId, uint32_t timestamp, tDataUnion data) override;
 
@@ -32,6 +33,3 @@ private:
     void updateImuData(tImuData data);
 
 };
-
-
-#endif //ROS_ADAS2019_ODOMETRYNODE_H

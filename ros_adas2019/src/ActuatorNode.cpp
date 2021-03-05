@@ -34,7 +34,8 @@ ActuatorNode::~ActuatorNode() {
 
 int main(int argc, char **argv) {
     rclcpp::init(argc, argv);
-	rclcpp::spin(std::make_shared<ActuatorNode>());
+    auto node = std::make_shared<ActuatorNode>();
+	rclcpp::spin(node);
 	rclcpp::shutdown();
 }
 
@@ -80,9 +81,9 @@ void ActuatorNode::onSpeedUpdate(const std_msgs::msg::Float32::SharedPtr msg) {
 void ActuatorNode::onEmergencyStopUpdate(const std_msgs::msg::Bool::SharedPtr msg) {
     if (msg->data) {
         sendEmergencyStop();
-        RCLCPP_WARN(this->get_logger(),"Emergency Stop activated!");
+        RCLCPP_WARN(this->get_logger(), "Emergency Stop activated!");
     } else {
-        RCLCPP_INFO(this->get_logger(),"Emergency Stop cannot be undone!");
+        RCLCPP_INFO(this->get_logger(), "Emergency Stop cannot be undone!");
     }
 }
 
