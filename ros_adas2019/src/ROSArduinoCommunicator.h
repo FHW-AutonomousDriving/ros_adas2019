@@ -1,5 +1,4 @@
-#ifndef ROS_ADAS2019_ROSARDUINOCOMMUNICATOR_H
-#define ROS_ADAS2019_ROSARDUINOCOMMUNICATOR_H
+#pragma once
 
 #include "../lib/arduino/arduino_protocol.h"
 #include "../lib/arduino/arduino_com_client.h"
@@ -26,6 +25,3 @@ protected:
     void sendWatchdog();
     void sendEmergencyStop();
 };
-
-
-#endif //ROS_ADAS2019_ROSARDUINOCOMMUNICATOR_H

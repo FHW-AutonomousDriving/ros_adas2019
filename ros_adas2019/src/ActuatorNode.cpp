@@ -1,10 +1,5 @@
-//
-// Created by  on 12.11.19.
-//
+#include <chrono>
 
-#include <cstdlib>
-
-#include "../lib/arduino/arduino_protocol.h"
 #include "ActuatorNode.h"
 
 ActuatorNode::ActuatorNode() : ROSArduinoCommunicator(ARDUINO_CENTER_ACTUATORS) {
@@ -19,18 +14,19 @@ ActuatorNode::ActuatorNode() : ROSArduinoCommunicator(ARDUINO_CENTER_ACTUATORS) 
     actuatorSteeringSubscriber = this->create_subscription<std_msgs::msg::Float32>("actuator/speed", 1, 
 		std::bind(&ActuatorNode::onSteeringUpdate, this, std::placeholders::_1)
     );
-/*
-ROS2TODO
-    actuatorHeadLightsSubscriber = nh.subscribe<std_msgs::Bool>("lights/head", 1, ActuatorNode::sendLightFactory(ID_ARD_ACT_LIGHT_MASK_HEAD));
-    actuatorBrakeLightsSubscriber = nh.subscribe<std_msgs::Bool>("lights/brake", 1, ActuatorNode::sendLightFactory(ID_ARD_ACT_LIGHT_MASK_BRAKE));
-    actuatorReverseLightsSubscriber = nh.subscribe<std_msgs::Bool>("lights/reverse", 1, ActuatorNode::sendLightFactory(ID_ARD_ACT_LIGHT_MASK_REVERSE));
-    actuatorHazardLightsSubscriber = nh.subscribe<std_msgs::Bool>("lights/hazard", 1, ActuatorNode::sendLightFactory(ID_ARD_ACT_LIGHT_MASK_HAZARD));
-    actuatorIndicatorLeftSubscriber = nh.subscribe<std_msgs::Bool>("lights/indicator_left", 1, ActuatorNode::sendLightFactory(ID_ARD_ACT_LIGHT_MASK_TURNLEFT));
-    actuatorIndicatorRightSubscriber = nh.subscribe<std_msgs::Bool>("lights/indicator_right", 1, ActuatorNode::sendLightFactory(ID_ARD_ACT_LIGHT_MASK_TURNRIGHT));
 
-    actuatorEmergencyStopSubscriber = nh.subscribe<std_msgs::Bool>("actuator/emergency_stop", 1, &ActuatorNode::onEmergencyStopUpdate, this);
-*/
-    // ROS2TODO timer = nh.createTimer(ros::Duration(0.1), &ActuatorNode::onWatchDogTimer, this);
+    actuatorHeadLightsSubscriber = this->create_subscription<std_msgs::msg::Bool>("lights/head", 1, ActuatorNode::sendLightFactory(ID_ARD_ACT_LIGHT_MASK_HEAD));
+    actuatorBrakeLightsSubscriber = this->create_subscription<std_msgs::msg::Bool>("lights/brake", 1, ActuatorNode::sendLightFactory(ID_ARD_ACT_LIGHT_MASK_BRAKE));
+    actuatorReverseLightsSubscriber = this->create_subscription<std_msgs::msg::Bool>("lights/reverse", 1, ActuatorNode::sendLightFactory(ID_ARD_ACT_LIGHT_MASK_REVERSE));
+    actuatorHazardLightsSubscriber = this->create_subscription<std_msgs::msg::Bool>("lights/hazard", 1, ActuatorNode::sendLightFactory(ID_ARD_ACT_LIGHT_MASK_HAZARD));
+    actuatorIndicatorLeftSubscriber = this->create_subscription<std_msgs::msg::Bool>("lights/indicator_left", 1, ActuatorNode::sendLightFactory(ID_ARD_ACT_LIGHT_MASK_TURNLEFT));
+    actuatorIndicatorRightSubscriber = this->create_subscription<std_msgs::msg::Bool>("lights/indicator_right", 1, ActuatorNode::sendLightFactory(ID_ARD_ACT_LIGHT_MASK_TURNRIGHT));
+
+    actuatorEmergencyStopSubscriber = this->create_subscription<std_msgs::msg::Bool>("actuator/emergency_stop", 1, 
+		std::bind(&ActuatorNode::onEmergencyStopUpdate, this, std::placeholders::_1)
+	);
+
+    timer = this->create_wall_timer(std::chrono::milliseconds(100), std::bind(&ActuatorNode::onWatchDogTimer, this));
 }
 
 ActuatorNode::~ActuatorNode() {
@@ -42,10 +38,10 @@ int main(int argc, char **argv) {
 	rclcpp::shutdown();
 }
 
-/* ROS2TODO
-std::function<void(const std_msgs::Bool::ConstPtr &)> ActuatorNode::sendLightFactory(u_char lightID) {
-    return [this, lightID](const std_msgs::Bool::ConstPtr &b) {
-        ROS_DEBUG("Recieved Light for %d with value %d", lightID, b->data);
+
+std::function<void(const std_msgs::msg::Bool::SharedPtr)> ActuatorNode::sendLightFactory(u_char lightID) {
+    return [this, lightID](const std_msgs::msg::Bool::SharedPtr b) {
+        RCLCPP_DEBUG(this->get_logger(), "Recieved Light for %d with value %d", lightID, b->data);
 
         if (lightID == ID_ARD_ACT_LIGHT_MASK_TURNLEFT) {
             lightMask &= ~ID_ARD_ACT_LIGHT_MASK_TURNRIGHT;
@@ -65,7 +61,7 @@ std::function<void(const std_msgs::Bool::ConstPtr &)> ActuatorNode::sendLightFac
         sendLight(lightMask);
     };
 }
-*/
+
 void ActuatorNode::onSteeringUpdate(const std_msgs::msg::Float32::SharedPtr msg) {
 	RCLCPP_DEBUG(this->get_logger(),
 		"I heard steering: [%f]", msg->data
@@ -79,20 +75,19 @@ void ActuatorNode::onSpeedUpdate(const std_msgs::msg::Float32::SharedPtr msg) {
     );
     sendSpeed(msg->data);
 }
-/*
+
 /// NOTE: Emergency Stop cannot be undone!
-void ActuatorNode::onEmergencyStopUpdate(const std_msgs::Bool::ConstPtr &msg) {
+void ActuatorNode::onEmergencyStopUpdate(const std_msgs::msg::Bool::SharedPtr msg) {
     if (msg->data) {
         sendEmergencyStop();
-        ROS_WARN("Emergency Stop activated!");
+        RCLCPP_WARN(this->get_logger(),"Emergency Stop activated!");
     } else {
-        ROS_INFO("Emergency Stop cannot be undone!");
+        RCLCPP_INFO(this->get_logger(),"Emergency Stop cannot be undone!");
     }
 }
 
-void ActuatorNode::onWatchDogTimer(const ros::TimerEvent &) {
+void ActuatorNode::onWatchDogTimer() {
     sendWatchdog();
 }
-*/
 
 void ActuatorNode::onDataReceived(SENSOR_ID, uint32_t, tDataUnion) {}

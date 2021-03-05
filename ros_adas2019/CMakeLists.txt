@@ -1,8 +1,7 @@
 cmake_minimum_required(VERSION 3.5)
 project(ros_adas2019)
 
-set(CMAKE_C_STANDARD 99)
-set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD 17)
 
 if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
   add_compile_options(-Wall -Wextra -Wpedantic)
@@ -11,7 +10,7 @@ endif()
 # dependencies
 find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
-find_package(Boost COMPONENTS thread chrono REQUIRED)
+find_package(Boost COMPONENTS thread chrono REQUIRED) # TODO: use C++17 features rather than boost
 
 set (ARDUINO_SOURCES
         ./lib/arduino/SerialDeviceBoost.h
