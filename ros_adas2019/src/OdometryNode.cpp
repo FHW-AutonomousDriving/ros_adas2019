@@ -1,27 +1,16 @@
-//
-// Created by ros-aadc on 12.11.19.
-//
-#include <ros/ros.h>
-#include <std_msgs/Float32.h>
-#include <ros_adas2019/Imu.h>
-#include <dynamic_reconfigure/server.h>
-#include <ros_adas2019/OdometryConfig.h>
-#include "../lib/arduino/arduino_protocol.h"
 #include "OdometryNode.h"
 
-ros_adas2019::OdometryConfig config = {};
-
-OdometryNode::OdometryNode(ros::NodeHandle &nh) : ROSArduinoCommunicator(ARDUINO_REAR_IMU_WHEELENC) {
-
-    odometryIMUPublisher = nh.advertise<ros_adas2019::Imu>("odometry/imu", 10);
-
-    odometryOverallSpeedPublisher = nh.advertise<std_msgs::Float32>("odometry/speed", 1);
-    odometryOverallDistancePublisher = nh.advertise<std_msgs::Float32>("odometry/distance", 1);
-    odometryLeftWheelSpeedPublisher = nh.advertise<std_msgs::Float32>("odometry/wheel_left/speed", 1);
-    odometryLeftWheelDistancePublisher = nh.advertise<std_msgs::Float32>("odometry/wheel_left/distance", 1);
-    odometryRightWheelSpeedPublisher = nh.advertise<std_msgs::Float32>("odometry/wheel_right/speed", 1);
-    odometryRightWheelDistancePublisher = nh.advertise<std_msgs::Float32>("odometry/wheel_right/distance", 1);
-
+OdometryNode::OdometryNode() : ROSArduinoCommunicator(ARDUINO_REAR_IMU_WHEELENC) {
+    odometryIMUPublisher = this->create_publisher<ros_adas2019::msg::Imu>("odometry/imu", 10);
+    odometryOverallSpeedPublisher = this->create_publisher<std_msgs::msg::Float32>("odometry/speed", 1);
+    odometryOverallDistancePublisher = this->create_publisher<std_msgs::msg::Float32>("odometry/distance", 1);
+    odometryLeftWheelSpeedPublisher = this->create_publisher<std_msgs::msg::Float32>("odometry/wheel_left/speed", 1);
+    odometryLeftWheelDistancePublisher = this->create_publisher<std_msgs::msg::Float32>("odometry/wheel_left/distance", 1);
+    odometryRightWheelSpeedPublisher = this->create_publisher<std_msgs::msg::Float32>("odometry/wheel_right/speed", 1);
+    odometryRightWheelDistancePublisher = this->create_publisher<std_msgs::msg::Float32>("odometry/wheel_right/distance", 1);
+    
+    this->declare_parameter<double>("wheel_circumference", 0.34); // the wheel circumference in meter[sic]
+    this->declare_parameter<int>("encoder_ticks_per_revolution", 60); // the number of steps per wheel revolution (one turn)
 }
 
 void OdometryNode::onDataReceived(SENSOR_ID sensorId, uint32_t timestamp, tDataUnion data) {
@@ -36,15 +25,20 @@ void OdometryNode::onDataReceived(SENSOR_ID sensorId, uint32_t timestamp, tDataU
             break;
 
         default:
-            ROS_WARN("Got data from unexpected odometry sensor: %d", sensorId);
+            RCLCPP_WARN(this->get_logger(), "Got data from unexpected odometry sensor: %d", sensorId);
             break;
     }
 }
 
-
 double OdometryNode::calculateDistance(uint32_t wheelTach, uint32_t lastWheelTach) {
     if ((wheelTach == 0) || (lastWheelTach == 0)) return 0;
 
+	// get volatile parameters
+	// TODO: cache and get lonly on update?
+    double wheel_circumference;
+    this->get_parameter("wheel_circumference", wheel_circumference);
+    int encoder_ticks_per_revolution;
+    this->get_parameter("encoder_ticks_per_revolution", encoder_ticks_per_revolution);
 
     uint32_t ticks;
     if (wheelTach < lastWheelTach) {
@@ -56,7 +50,7 @@ double OdometryNode::calculateDistance(uint32_t wheelTach, uint32_t lastWheelTac
     //                  circumference
     // distance = -------------------------- * [ticks since last trigger]
     //              [ticks per revolution]
-    return (double) ticks * config.wheel_circumference / config.encoder_ticks_per_revolution;
+    return double(ticks) * wheel_circumference / encoder_ticks_per_revolution;
 }
 
 double OdometryNode::calculateSpeed(uint32_t timestamp, uint32_t lastTimestamp, double distance) {
@@ -77,9 +71,8 @@ double OdometryNode::calculateSpeed(uint32_t timestamp, uint32_t lastTimestamp, 
     return distance / timeDiff;
 }
 
-
 void OdometryNode::updateOdometryWheelEncoder(SENSOR_ID sensorId, uint32_t timestamp, tSensWheelData wheelData) {
-    static std_msgs::Float32 message;
+    static std_msgs::msg::Float32 message;
 
     static tSensWheelData lastWheelDataLeft;
     static uint32_t lastTimestampLeft = 0;
@@ -113,9 +106,9 @@ void OdometryNode::updateOdometryWheelEncoder(SENSOR_ID sensorId, uint32_t times
 
                 // publish left wheel speed on its own topic
                 message.data = wheelSpeedLeft;
-                odometryLeftWheelSpeedPublisher.publish(message);
+                odometryLeftWheelSpeedPublisher->publish(message);
                 message.data = totalDistanceLeft;
-                odometryLeftWheelDistancePublisher.publish(message);
+                odometryLeftWheelDistancePublisher->publish(message);
             }
 
             leftWheelIsInitialized = true;
@@ -141,9 +134,9 @@ void OdometryNode::updateOdometryWheelEncoder(SENSOR_ID sensorId, uint32_t times
 
                 // publish right wheel speed on its own topic
                 message.data = wheelSpeedRight;
-                odometryRightWheelSpeedPublisher.publish(message);
+                odometryRightWheelSpeedPublisher->publish(message);
                 message.data = totalDistanceRight;
-                odometryRightWheelDistancePublisher.publish(message);
+                odometryRightWheelDistancePublisher->publish(message);
             }
 
             rightWheelIsInitialized = true;
@@ -152,23 +145,23 @@ void OdometryNode::updateOdometryWheelEncoder(SENSOR_ID sensorId, uint32_t times
             break;
 
         default:
-            ROS_WARN("Got data from unexpected wheel encoder: %d", sensorId);
+            RCLCPP_WARN(this->get_logger(), "Got data from unexpected wheel encoder: %d", sensorId);
             break;
     }
 
 
     // publish average distance
     message.data = totalDistanceLeft / 2 + totalDistanceRight / 2;
-    odometryOverallDistancePublisher.publish(message);
+    odometryOverallDistancePublisher->publish(message);
 
     // publish average speed
     message.data = lastWheelSpeedLeft / 2 + lastWheelSpeedRight / 2;
-    odometryOverallSpeedPublisher.publish(message);
+    odometryOverallSpeedPublisher->publish(message);
 
 }
 
 void OdometryNode::updateImuData(tImuData data) {
-    ros_adas2019::Imu imu_message;
+    ros_adas2019::msg::Imu imu_message;
     imu_message.linear_acceleration.x = data.f32ax;
     imu_message.linear_acceleration.y = data.f32ay;
     imu_message.linear_acceleration.z = data.f32az;
@@ -182,34 +175,21 @@ void OdometryNode::updateImuData(tImuData data) {
     imu_message.orientation.y = data.f32pitch;
     imu_message.orientation.z = data.f32yaw;
 
-    odometryIMUPublisher.publish(imu_message);
+    odometryIMUPublisher->publish(imu_message);
 }
 
-
-void callback(ros_adas2019::OdometryConfig &new_config, uint32_t level) {
-
-//  ROS_INFO("OdometryConfig: \tencoder_ticks_per_revolution: %d |\twheel_circumference: %f",
-//           new_config.encoder_ticks_per_revolution, new_config.wheel_circumference);
-
-    config = new_config;
+OdometryNode::~OdometryNode() {
 }
-
 
 int main(int argc, char **argv) {
-    //Initializes ROS, and sets up a node
-    ros::init(argc, argv, "OdometryNode");
-    ros::NodeHandle nh;
-    OdometryNode node(nh);
+    rclcpp::init(argc, argv);
+    auto node = std::make_shared<OdometryNode>();
 
-    dynamic_reconfigure::Server<ros_adas2019::OdometryConfig> server;
-    server.setCallback(&callback);
+    rclcpp::Rate poll_rate(120);
 
-
-    ros::Rate poll_rate(120);
-
-    while (ros::ok()) {
-        ros::spinOnce();
-        node.triggerUpdate();
+    while (rclcpp::ok()) {
+        rclcpp::spin_some(node);
+        node->triggerUpdate();
 
         poll_rate.sleep();
     }

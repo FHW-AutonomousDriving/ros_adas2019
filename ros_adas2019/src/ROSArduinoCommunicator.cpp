@@ -1,6 +1,6 @@
 #include "ROSArduinoCommunicator.h"
 
-ROSArduinoCommunicator::ROSArduinoCommunicator(ARDUINO_ID arduinoId) : rclcpp::Node::Node("ROS2TODO"/*"adas_2019"*/) {
+ROSArduinoCommunicator::ROSArduinoCommunicator(ARDUINO_ID arduinoId) : rclcpp::Node::Node("adas_2019") {
     if (!arduinoComClient.init(arduinoId, SERIAL_DEVICE_PREFIX, NUM_ARDUINO)) {
         RCLCPP_ERROR(this->get_logger(),
 			"Unable to find arduino with id %d.",

@@ -11,32 +11,53 @@ endif()
 find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(Boost COMPONENTS thread chrono REQUIRED) # TODO: use C++17 features rather than boost
-
+ 
 set (ARDUINO_SOURCES
-        ./lib/arduino/SerialDeviceBoost.h
-        ./lib/arduino/SerialDeviceBoost.cpp
-        ./lib/arduino/arduino_com_client.h
-        ./lib/arduino/arduino_com_client.cpp
-        ./lib/arduino/arduino_com_helpers.h
-        src/ROSArduinoCommunicator.cpp
-        src/ROSArduinoCommunicator.h
+  lib/arduino/SerialDeviceBoost.h
+  lib/arduino/SerialDeviceBoost.cpp
+  lib/arduino/arduino_com_client.h
+  lib/arduino/arduino_com_client.cpp
+  lib/arduino/arduino_com_helpers.h
+  src/ROSArduinoCommunicator.cpp
+  src/ROSArduinoCommunicator.h
 )
 
 add_executable(Actuator 
-	src/ROSArduinoCommunicator.cpp 
-	src/ROSArduinoCommunicator.h
-	src/ActuatorNode.cpp 
-	src/ActuatorNode.h
-	${ARDUINO_SOURCES}
+  src/ActuatorNode.cpp 
+  src/ActuatorNode.h
+  ${ARDUINO_SOURCES}
 )
 ament_target_dependencies(Actuator rclcpp)
-target_compile_definitions(Actuator PUBLIC ROS_VERSION=2) # https://answers.ros.org/question/336640/get-ros2-version-in-c/
 target_link_libraries(Actuator Boost::thread Boost::chrono)
-target_include_directories(Actuator PUBLIC
-  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-  $<INSTALL_INTERFACE:include>)
+#target_include_directories(Actuator PUBLIC
+#  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+#  $<INSTALL_INTERFACE:include>)
 
-install(TARGETS Actuator
+add_executable(Odometry 
+  src/OdometryNode.cpp 
+  src/OdometryNode.h
+  ${ARDUINO_SOURCES}
+)
+ament_target_dependencies(Odometry rclcpp)
+target_link_libraries(Odometry Boost::thread Boost::chrono)
+# https://docs.ros.org/en/foxy/Tutorials/Custom-ROS2-Interfaces.html#create-custom-definitions
+find_package(rosidl_default_generators REQUIRED)
+find_package(geometry_msgs REQUIRED)
+rosidl_generate_interfaces(${PROJECT_NAME}
+  "msg/Imu.msg"
+   DEPENDENCIES geometry_msgs
+)
+# https://discourse.ros.org/t/ros2-how-to-use-custom-message-in-project-where-its-declared/2071
+rosidl_target_interfaces(Odometry
+  ${PROJECT_NAME} "rosidl_typesupport_cpp"
+)
+#target_include_directories(Odometry PUBLIC
+#  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+#  $<INSTALL_INTERFACE:include>)
+
+install(TARGETS 
+  Actuator 
+  Odometry
   DESTINATION lib/${PROJECT_NAME})
 
 if(BUILD_TESTING)
