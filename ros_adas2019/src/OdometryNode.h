@@ -21,9 +21,6 @@ private:
     rclcpp::Publisher<std_msgs::msg::Float32>::SharedPtr odometryRightWheelSpeedPublisher;
     rclcpp::Publisher<std_msgs::msg::Float32>::SharedPtr odometryRightWheelDistancePublisher;
 
-	rcl_interfaces::msg::SetParametersResult onParameterChange(const std::vector<rclcpp::Parameter> & parameters);
-	std::vector<rclcpp::Parameter> parameters;
-
     void onDataReceived(SENSOR_ID sensorId, uint32_t timestamp, tDataUnion data) override;
 
     double calculateDistance(uint32_t wheelTach, uint32_t lastWheelTach);

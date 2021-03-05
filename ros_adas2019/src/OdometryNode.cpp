@@ -9,13 +9,8 @@ OdometryNode::OdometryNode() : ROSArduinoCommunicator(ARDUINO_REAR_IMU_WHEELENC)
     odometryRightWheelSpeedPublisher = this->create_publisher<std_msgs::msg::Float32>("odometry/wheel_right/speed", 1);
     odometryRightWheelDistancePublisher = this->create_publisher<std_msgs::msg::Float32>("odometry/wheel_right/distance", 1);
     
-    this->declare_parameter<int>("wheel_circumference", 60);
-    this->declare_parameter<double>("encoder_ticks_per_revolution", 0.34);
-    /*
-    this->add_on_set_parameters_callback(
-        std::bind(&OdometryNode::onParameterChange, this, std::placeholders::_1)
-    );
-    */
+    this->declare_parameter<double>("wheel_circumference", 0.34); // the wheel circumference in meter[sic]
+    this->declare_parameter<int>("encoder_ticks_per_revolution", 60); // the number of steps per wheel revolution (one turn)
 }
 
 void OdometryNode::onDataReceived(SENSOR_ID sensorId, uint32_t timestamp, tDataUnion data) {
@@ -38,6 +33,12 @@ void OdometryNode::onDataReceived(SENSOR_ID sensorId, uint32_t timestamp, tDataU
 double OdometryNode::calculateDistance(uint32_t wheelTach, uint32_t lastWheelTach) {
     if ((wheelTach == 0) || (lastWheelTach == 0)) return 0;
 
+	// get volatile parameters
+	// TODO: cache and get lonly on update?
+    double wheel_circumference;
+    this->get_parameter("wheel_circumference", wheel_circumference);
+    int encoder_ticks_per_revolution;
+    this->get_parameter("encoder_ticks_per_revolution", encoder_ticks_per_revolution);
 
     uint32_t ticks;
     if (wheelTach < lastWheelTach) {
@@ -49,11 +50,7 @@ double OdometryNode::calculateDistance(uint32_t wheelTach, uint32_t lastWheelTac
     //                  circumference
     // distance = -------------------------- * [ticks since last trigger]
     //              [ticks per revolution]
-    double wheel_circumference;
-    this->get_parameter("wheel_circumference", wheel_circumference);
-    int encoder_ticks_per_revolution;
-    this->get_parameter("encoder_ticks_per_revolution", encoder_ticks_per_revolution);
-    return (double) ticks * wheel_circumference / encoder_ticks_per_revolution;
+    return double(ticks) * wheel_circumference / encoder_ticks_per_revolution;
 }
 
 double OdometryNode::calculateSpeed(uint32_t timestamp, uint32_t lastTimestamp, double distance) {
@@ -179,16 +176,6 @@ void OdometryNode::updateImuData(tImuData data) {
     imu_message.orientation.z = data.f32yaw;
 
     odometryIMUPublisher->publish(imu_message);
-}
-
-rcl_interfaces::msg::SetParametersResult OdometryNode::onParameterChange(const std::vector<rclcpp::Parameter> & parameters) {
-//  RCLCPP_WARN(this->get_logger(), "OdometryConfig: \tencoder_ticks_per_revolution: %d |\twheel_circumference: %f",
-//           new_config.encoder_ticks_per_revolution, new_config.wheel_circumference);
-
-  this->parameters = parameters;
-  rcl_interfaces::msg::SetParametersResult result;
-  result.successful = true;
-  return result;
 }
 
 OdometryNode::~OdometryNode() {
