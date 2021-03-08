@@ -1,7 +1,3 @@
-//
-// Created by ros-aadc on 12.11.19.
-//
-
 #include "ROSArduinoCommunicator.h"
 
 ROSArduinoCommunicator::ROSArduinoCommunicator(ARDUINO_ID arduinoId) : rclcpp::Node::Node("adas_2019") {
