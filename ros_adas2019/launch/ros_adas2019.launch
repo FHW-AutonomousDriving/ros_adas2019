@@ -1,10 +1,12 @@
 <launch>
-     <group ns="adas2019">
-          <node name="adas2019ActuatorNode" pkg="ros_adas2019" type="ros_adas2019_actuator_node" output="screen"/>
-          <node name="adas2019BatteryNode" pkg="ros_adas2019" type="ros_adas2019_battery_node" output="screen"/>
-          <node name="adas2019OdometryNode" pkg="ros_adas2019" type="ros_adas2019_odometry_node" output="screen"/>
-          <node name="adas2019UltrasonicNode" pkg="ros_adas2019" type="ros_adas2019_ultrasonic_node" output="screen"/>
+     <group>
+          <push-ros-namespace namespace="adas2019"/>
+          <node name="adas2019ActuatorNode" pkg="ros_adas2019" exec="Actuator" output="screen"/>
+          <node name="adas2019BatteryNode" pkg="ros_adas2019" exec="Battery" output="screen"/>
+          <node name="adas2019OdometryNode" pkg="ros_adas2019" exec="Odometry" output="screen"/>
+          <node name="adas2019UltrasonicNode" pkg="ros_adas2019" exec="Ultrasonic" output="screen"/>
      </group>
+     <!--
      <group>
           <node name="uss_side_left_frame" pkg="tf2_ros" type="static_transform_publisher" args="0.255 0.15 0 0 0 0.7071068 0.7071068 base_link uss_side_left"/>
           <node name="uss_rear_left_frame" pkg="tf2_ros" type="static_transform_publisher" args="-0.08 0.11 0 0 0 0.9659258 0.258819 base_link uss_rear_left"/>
@@ -12,4 +14,5 @@
           <node name="uss_rear_right_frame" pkg="tf2_ros" type="static_transform_publisher" args="-0.08 -0.11 0 0 0 0.9659258 -0.258819 base_link uss_rear_right"/>
           <node name="uss_side_right_frame" pkg="tf2_ros" type="static_transform_publisher" args="0.255 -0.15 0 0 0 -0.7071068 0.7071068 base_link uss_side_right"/>
      </group>
+     -->
 </launch>
