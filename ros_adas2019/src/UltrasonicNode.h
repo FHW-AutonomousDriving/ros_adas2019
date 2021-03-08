@@ -1,29 +1,23 @@
-//
-// Created by ros-aadc on 12.11.19.
-//
+#pragma once
 
-#ifndef ROS_ADAS2019_ULTRASONICNODE_H
-#define ROS_ADAS2019_ULTRASONICNODE_H
-
+#include <sensor_msgs/msg/range.hpp>
 #include "ROSArduinoCommunicator.h"
 
 class UltrasonicNode: public ROSArduinoCommunicator {
 public:
 
-    UltrasonicNode(ros::NodeHandle &nh);
+    UltrasonicNode();
+    ~UltrasonicNode();
 
 private:
 
-    ros::Publisher ultrasonicSideLeftPublisher;
-    ros::Publisher ultrasonicRearLeftPublisher;
-    ros::Publisher ultrasonicRearCenterPublisher;
-    ros::Publisher ultrasonicRearRightPublisher;
-    ros::Publisher ultrasonicSideRightPublisher;
+    rclcpp::Publisher<sensor_msgs::msg::Range>::SharedPtr ultrasonicSideLeftPublisher;
+    rclcpp::Publisher<sensor_msgs::msg::Range>::SharedPtr ultrasonicRearLeftPublisher;
+    rclcpp::Publisher<sensor_msgs::msg::Range>::SharedPtr ultrasonicRearCenterPublisher;
+    rclcpp::Publisher<sensor_msgs::msg::Range>::SharedPtr ultrasonicRearRightPublisher;
+    rclcpp::Publisher<sensor_msgs::msg::Range>::SharedPtr ultrasonicSideRightPublisher;
 
 
     void onDataReceived(SENSOR_ID sensorId, uint32_t timestamp, tDataUnion data) override;
     void updateUltrasonicRangeValue(SENSOR_ID sensorId, int16_t range);
 };
-
-
-#endif //ROS_ADAS2019_ULTRASONICNODE_H
