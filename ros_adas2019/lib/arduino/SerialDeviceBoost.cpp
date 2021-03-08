@@ -54,9 +54,13 @@ bool SerialDeviceBoost::open(const char* device, unsigned long baudrate)
 
     }
     catch (boost::exception&  e)
-    {        
+    {
+        #ifdef ARDUINO_RETHROW
+        throw;
+        #else
         std::cerr << boost::diagnostic_information(e);
         return false;
+        #endif
     }
 
     return true;
@@ -72,16 +76,19 @@ int SerialDeviceBoost::write(void *data, int length)
     // if the buffer is full, write_some will not return
     // so receiver has to poll data
     int written = 0;
-    //try
-    //{
+    try
+    {
         written = int(m_port.write_some(boost::asio::buffer((uint8_t*)data, size_t(length))));
-    //}
-    //catch (boost::exception& e)
-    //{
-	//	std::cerr << "Exception in " << __FILE__ << ", line " << __LINE__ << "\n";
-    //    std::cerr << boost::diagnostic_information(e);
-    //    return false;
-    //}
+    }
+    catch (boost::exception& e)
+    {
+        #ifdef ARDUINO_RETHROW
+        throw;
+        #else
+        std::cerr << boost::diagnostic_information(e);
+        return false;
+        #endif
+    }
 
     return written;
 }

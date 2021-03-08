@@ -12,12 +12,9 @@ find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(sensor_msgs REQUIRED)
 
-# arduino soucres
+# ROSArduinoCommunicator library
 find_package(Boost COMPONENTS thread chrono REQUIRED) # TODO: use C++17 features rather than boost
-set(ARDUINO_LIBRARIES
-  Boost::thread Boost::chrono
-)
-set(ARDUINO_SOURCES
+add_library(Arduino STATIC
   lib/arduino/SerialDeviceBoost.h
   lib/arduino/SerialDeviceBoost.cpp
   lib/arduino/arduino_com_client.h
@@ -26,6 +23,9 @@ set(ARDUINO_SOURCES
   src/ROSArduinoCommunicator.cpp
   src/ROSArduinoCommunicator.h
 )
+target_compile_definitions(Arduino PUBLIC ARDUINO_RETHROW) # fail early, fail hard
+ament_target_dependencies(Arduino rclcpp)
+target_link_libraries(Arduino Boost::thread Boost::chrono)
 
 # the Acuator node
 add_executable(Actuator 
@@ -34,7 +34,7 @@ add_executable(Actuator
   ${ARDUINO_SOURCES}
 )
 ament_target_dependencies(Actuator rclcpp)
-target_link_libraries(Actuator ${ARDUINO_LIBRARIES})
+target_link_libraries(Actuator Arduino)
 
 # the Odometry node
 add_executable(Odometry 
@@ -43,7 +43,7 @@ add_executable(Odometry
   ${ARDUINO_SOURCES}
 )
 ament_target_dependencies(Odometry rclcpp)
-target_link_libraries(Odometry ${ARDUINO_LIBRARIES})
+target_link_libraries(Odometry Arduino)
 # https://docs.ros.org/en/foxy/Tutorials/Custom-ROS2-Interfaces.html#create-custom-definitions
 find_package(rosidl_default_generators REQUIRED)
 find_package(geometry_msgs REQUIRED)
@@ -63,7 +63,7 @@ add_executable(Battery
   ${ARDUINO_SOURCES}
 )
 ament_target_dependencies(Battery rclcpp sensor_msgs)
-target_link_libraries(Battery ${ARDUINO_LIBRARIES})
+target_link_libraries(Battery Arduino)
 
 # the Ultrasonic node
 add_executable(Ultrasonic 
@@ -72,7 +72,7 @@ add_executable(Ultrasonic
   ${ARDUINO_SOURCES}
 )
 ament_target_dependencies(Ultrasonic rclcpp sensor_msgs)
-target_link_libraries(Ultrasonic ${ARDUINO_LIBRARIES})
+target_link_libraries(Ultrasonic Arduino)
 
 # install all nodes
 install(TARGETS 
@@ -80,17 +80,12 @@ install(TARGETS
   Odometry
   Battery
   Ultrasonic
-  DESTINATION lib/${PROJECT_NAME})
+  DESTINATION lib/${PROJECT_NAME}
+)
 
-if(BUILD_TESTING)
-  find_package(ament_lint_auto REQUIRED)
-  # the following line skips the linter which checks for copyrights
-  # uncomment the line when a copyright and license is not present in all source files
-  #set(ament_cmake_copyright_FOUND TRUE)
-  # the following line skips cpplint (only works in a git repo)
-  # uncomment the line when this package is not in a git repo
-  #set(ament_cmake_cpplint_FOUND TRUE)
-  ament_lint_auto_find_test_dependencies()
-endif()
+# install launch directory
+install(DIRECTORY launch
+  DESTINATION share/${PROJECT_NAME}
+)
 
 ament_package()

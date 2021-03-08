@@ -3,7 +3,7 @@
 #include "../lib/arduino/arduino_protocol.h"
 #include "../lib/arduino/arduino_com_client.h"
 
-#include "rclcpp/rclcpp.hpp"
+#include <rclcpp/rclcpp.hpp>
 
 class ROSArduinoCommunicator : public rclcpp::Node {
 
