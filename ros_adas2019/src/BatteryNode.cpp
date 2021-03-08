@@ -1,34 +1,26 @@
-//
-// Created by ros-aadc on 12.11.19.
-//
-
-#include <ros/ros.h>
-#include <sensor_msgs/BatteryState.h>
-
-#include "../lib/arduino/arduino_protocol.h"
 #include "BatteryNode.h"
 
 
-BatteryNode::BatteryNode(ros::NodeHandle &nh) : ROSArduinoCommunicator(ARDUINO_CENTER_MEASUREMENT) {
-    batterySensorPublisher = nh.advertise<sensor_msgs::BatteryState>("battery/sensor", 1);
-    batteryActuatorPublisher = nh.advertise<sensor_msgs::BatteryState>("battery/actuator", 1);
+BatteryNode::BatteryNode() : ROSArduinoCommunicator(ARDUINO_CENTER_MEASUREMENT) {
+    batterySensorPublisher = this->create_publisher<sensor_msgs::msg::BatteryState>("battery/sensor", 1);
+    batteryActuatorPublisher = this->create_publisher<sensor_msgs::msg::BatteryState>("battery/actuator", 1);
 }
 
-void BatteryNode::onDataReceived(SENSOR_ID sensorId, uint32_t timestamp, tDataUnion data) {
+void BatteryNode::onDataReceived(SENSOR_ID sensorId, uint32_t, tDataUnion data) {
     static bool initialized = false;
-    static sensor_msgs::BatteryState actuator_message;
-    static sensor_msgs::BatteryState sensor_message;
+    static sensor_msgs::msg::BatteryState actuator_message;
+    static sensor_msgs::msg::BatteryState sensor_message;
 
     if (!initialized) {
         actuator_message.cell_voltage = {-1.0, -1.0};
-        actuator_message.power_supply_status = sensor_msgs::BatteryState::POWER_SUPPLY_STATUS_UNKNOWN;
-        actuator_message.power_supply_health = sensor_msgs::BatteryState::POWER_SUPPLY_HEALTH_UNKNOWN;
-        actuator_message.power_supply_technology = sensor_msgs::BatteryState::POWER_SUPPLY_TECHNOLOGY_LIPO;
+        actuator_message.power_supply_status = sensor_msgs::msg::BatteryState::POWER_SUPPLY_STATUS_UNKNOWN;
+        actuator_message.power_supply_health = sensor_msgs::msg::BatteryState::POWER_SUPPLY_HEALTH_UNKNOWN;
+        actuator_message.power_supply_technology = sensor_msgs::msg::BatteryState::POWER_SUPPLY_TECHNOLOGY_LIPO;
 
         sensor_message.cell_voltage = {-1.0, -1.0, -1.0, -1.0, -1.0, -1.0};
-        sensor_message.power_supply_status = sensor_msgs::BatteryState::POWER_SUPPLY_STATUS_UNKNOWN;
-        sensor_message.power_supply_health = sensor_msgs::BatteryState::POWER_SUPPLY_HEALTH_UNKNOWN;
-        sensor_message.power_supply_technology = sensor_msgs::BatteryState::POWER_SUPPLY_TECHNOLOGY_LIPO;
+        sensor_message.power_supply_status = sensor_msgs::msg::BatteryState::POWER_SUPPLY_STATUS_UNKNOWN;
+        sensor_message.power_supply_health = sensor_msgs::msg::BatteryState::POWER_SUPPLY_HEALTH_UNKNOWN;
+        sensor_message.power_supply_technology = sensor_msgs::msg::BatteryState::POWER_SUPPLY_TECHNOLOGY_LIPO;
 
         initialized = true;
     }
@@ -43,7 +35,7 @@ void BatteryNode::onDataReceived(SENSOR_ID sensorId, uint32_t timestamp, tDataUn
             actuator_message.voltage = voltage;
             if (std::any_of(actuator_message.cell_voltage.begin(), actuator_message.cell_voltage.end(), [](float f){return f == -1.0;}))
                 return;
-            batteryActuatorPublisher.publish(actuator_message);
+            batteryActuatorPublisher->publish(actuator_message);
             break;
 
         case ID_ARD_SENS_VOLT_ACTUATOR_CELL1:
@@ -58,7 +50,7 @@ void BatteryNode::onDataReceived(SENSOR_ID sensorId, uint32_t timestamp, tDataUn
             sensor_message.voltage = voltage;
             if (std::any_of(sensor_message.cell_voltage.begin(), sensor_message.cell_voltage.end(), [](float f){return f == -1.0;}))
                 return;
-            batterySensorPublisher.publish(sensor_message);
+            batterySensorPublisher->publish(sensor_message);
             break;
 
         case ID_ARD_SENS_VOLT_SENSORS_CELL1:
@@ -86,20 +78,22 @@ void BatteryNode::onDataReceived(SENSOR_ID sensorId, uint32_t timestamp, tDataUn
             break;
 
         default:
-            ROS_WARN("Got data from unexpected battery: %d", sensorId);
+            RCLCPP_WARN(this->get_logger(), "Got data from unexpected battery: %d", sensorId);
             break;
     }
 }
+
+BatteryNode::~BatteryNode() {
+}
+
 int main(int argc, char **argv) {
-    //Initializes ROS, and sets up a node
-    ros::init(argc, argv, "BatteryNode");
-    ros::NodeHandle nh;
-    BatteryNode node(nh);
-
-    ros::Rate poll_rate(30);
-
-    while(ros::ok()) {
-        node.triggerUpdate();
+    rclcpp::init(argc, argv);
+    auto node = std::make_shared<BatteryNode>();
+    rclcpp::Rate poll_rate(30);
+    while (rclcpp::ok()) {
+        rclcpp::spin_some(node);
+        node->triggerUpdate();
         poll_rate.sleep();
     }
+    return 0;
 }

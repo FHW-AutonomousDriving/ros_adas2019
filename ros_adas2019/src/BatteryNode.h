@@ -1,23 +1,18 @@
-//
-// Created by ros-aadc on 12.11.19.
-//
+#pragma once
 
-#ifndef ROS_ADAS2019_BATTERYNODE_H
-#define ROS_ADAS2019_BATTERYNODE_H
-
+#include <sensor_msgs/msg/battery_state.hpp>
 #include "ROSArduinoCommunicator.h"
 
-class BatteryNode: public ROSArduinoCommunicator {
+class BatteryNode : public ROSArduinoCommunicator {
 public:
 
-    BatteryNode(ros::NodeHandle &nh);
+    BatteryNode();
+    ~BatteryNode();
 
 private:
 
-    ros::Publisher batteryActuatorPublisher;
-    ros::Publisher batterySensorPublisher;
+    rclcpp::Publisher<sensor_msgs::msg::BatteryState>::SharedPtr batteryActuatorPublisher;
+    rclcpp::Publisher<sensor_msgs::msg::BatteryState>::SharedPtr batterySensorPublisher;
 
     void onDataReceived(SENSOR_ID sensorId, uint32_t timestamp, tDataUnion data) override;
 };
-
-#endif //ROS_ADAS2019_BATTERYNODE_H
