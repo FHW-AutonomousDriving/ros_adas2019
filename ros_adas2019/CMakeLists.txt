@@ -7,12 +7,16 @@ if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
   add_compile_options(-Wall -Wextra -Wpedantic)
 endif()
 
-# global dependencies
+# shared dependencies
 find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
-find_package(Boost COMPONENTS thread chrono REQUIRED) # TODO: use C++17 features rather than boost
+find_package(sensor_msgs REQUIRED)
 
 # arduino soucres
+find_package(Boost COMPONENTS thread chrono REQUIRED) # TODO: use C++17 features rather than boost
+set(ARDUINO_LIBRARIES
+  Boost::thread Boost::chrono
+)
 set(ARDUINO_SOURCES
   lib/arduino/SerialDeviceBoost.h
   lib/arduino/SerialDeviceBoost.cpp
@@ -21,9 +25,6 @@ set(ARDUINO_SOURCES
   lib/arduino/arduino_com_helpers.h
   src/ROSArduinoCommunicator.cpp
   src/ROSArduinoCommunicator.h
-)
-set(ARDUINO_LIBRARIES
-  Boost::thread Boost::chrono
 )
 
 # the Acuator node
@@ -56,7 +57,6 @@ rosidl_target_interfaces(Odometry
 )
 
 # the Battery node
-find_package(sensor_msgs REQUIRED)
 add_executable(Battery 
   src/BatteryNode.cpp 
   src/BatteryNode.h
@@ -65,11 +65,21 @@ add_executable(Battery
 ament_target_dependencies(Battery rclcpp sensor_msgs)
 target_link_libraries(Battery ${ARDUINO_LIBRARIES})
 
+# the Ultrasonic node
+add_executable(Ultrasonic 
+  src/UltrasonicNode.cpp 
+  src/UltrasonicNode.h
+  ${ARDUINO_SOURCES}
+)
+ament_target_dependencies(Ultrasonic rclcpp sensor_msgs)
+target_link_libraries(Ultrasonic ${ARDUINO_LIBRARIES})
+
 # install all nodes
 install(TARGETS 
   Actuator 
   Odometry
   Battery
+  Ultrasonic
   DESTINATION lib/${PROJECT_NAME})
 
 if(BUILD_TESTING)
