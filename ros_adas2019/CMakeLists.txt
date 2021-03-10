@@ -12,7 +12,7 @@ find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(sensor_msgs REQUIRED)
 
-# arduino soucres
+# ROSArduinoCommunicator library
 find_package(Boost COMPONENTS thread chrono REQUIRED) # TODO: use C++17 features rather than boost
 add_library(Arduino STATIC
   lib/arduino/SerialDeviceBoost.h
@@ -23,7 +23,7 @@ add_library(Arduino STATIC
   src/ROSArduinoCommunicator.cpp
   src/ROSArduinoCommunicator.h
 )
-target_compile_definitions(Arduino PUBLIC ARDUINO_RETHROW)
+target_compile_definitions(Arduino PUBLIC ARDUINO_RETHROW) # fail early, fail hard
 ament_target_dependencies(Arduino rclcpp)
 target_link_libraries(Arduino Boost::thread Boost::chrono)
 
