@@ -19,9 +19,9 @@
 
     <group>
        <push-ros-namespace namespace="pylon_camera_node"/>
-        <arg name="camera_info_url" default="package://ros_adas2019/config/front_camera_calibration.yaml" />
+        <arg name="camera_info_yaml" default="$(find-pkg-share ros_adas2019)/config/front_camera_calibration.yaml" />
         <node name="pylon_camera" pkg="pylon_usb_instant_camera" exec="node" output="screen">
-            <param name="camera_info_url" value="$(var camera_info_url)" />
+            <param name="camera_info_yaml" value="$(var camera_info_yaml)" />
         </node>
         <node name="pylon_camera_rectify" pkg="image_proc" exec="image_proc" output="screen" />
     </group>
