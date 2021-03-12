@@ -3,7 +3,7 @@
 #include <ros_adas2019/msg/imu.hpp>
 #include <std_msgs/msg/float32.hpp>
 
-#include "ROSArduinoCommunicator.h"
+#include "ROSArduinoCommunicator.hpp"
 
 class OdometryNode : public ROSArduinoCommunicator {
 public:

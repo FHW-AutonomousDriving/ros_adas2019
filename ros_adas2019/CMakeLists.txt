@@ -21,7 +21,7 @@ add_library(Arduino STATIC
   lib/arduino/arduino_com_client.cpp
   lib/arduino/arduino_com_helpers.h
   src/ROSArduinoCommunicator.cpp
-  src/ROSArduinoCommunicator.h
+  src/ROSArduinoCommunicator.hpp
 )
 target_compile_definitions(Arduino PUBLIC ARDUINO_RETHROW) # fail early, fail hard
 ament_target_dependencies(Arduino rclcpp)
@@ -30,8 +30,7 @@ target_link_libraries(Arduino Boost::thread Boost::chrono)
 # the Acuator node
 add_executable(Actuator 
   src/ActuatorNode.cpp 
-  src/ActuatorNode.h
-  ${ARDUINO_SOURCES}
+  src/ActuatorNode.hpp
 )
 ament_target_dependencies(Actuator rclcpp)
 target_link_libraries(Actuator Arduino)
@@ -39,8 +38,7 @@ target_link_libraries(Actuator Arduino)
 # the Odometry node
 add_executable(Odometry 
   src/OdometryNode.cpp 
-  src/OdometryNode.h
-  ${ARDUINO_SOURCES}
+  src/OdometryNode.hpp
 )
 ament_target_dependencies(Odometry rclcpp)
 target_link_libraries(Odometry Arduino)
@@ -59,8 +57,7 @@ rosidl_target_interfaces(Odometry
 # the Battery node
 add_executable(Battery 
   src/BatteryNode.cpp 
-  src/BatteryNode.h
-  ${ARDUINO_SOURCES}
+  src/BatteryNode.hpp
 )
 ament_target_dependencies(Battery rclcpp sensor_msgs)
 target_link_libraries(Battery Arduino)
@@ -68,8 +65,7 @@ target_link_libraries(Battery Arduino)
 # the Ultrasonic node
 add_executable(Ultrasonic 
   src/UltrasonicNode.cpp 
-  src/UltrasonicNode.h
-  ${ARDUINO_SOURCES}
+  src/UltrasonicNode.hpp
 )
 ament_target_dependencies(Ultrasonic rclcpp sensor_msgs)
 target_link_libraries(Ultrasonic Arduino)
@@ -83,8 +79,8 @@ install(TARGETS
   DESTINATION lib/${PROJECT_NAME}
 )
 
-# install launch directory
-install(DIRECTORY launch
+# install launch and config files
+install(DIRECTORY launch config
   DESTINATION share/${PROJECT_NAME}
 )
 

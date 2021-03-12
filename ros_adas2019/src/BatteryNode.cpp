@@ -1,4 +1,4 @@
-#include "BatteryNode.h"
+#include "BatteryNode.hpp"
 
 
 BatteryNode::BatteryNode() : ROSArduinoCommunicator(ARDUINO_CENTER_MEASUREMENT) {

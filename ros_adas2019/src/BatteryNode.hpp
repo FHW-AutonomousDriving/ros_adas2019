@@ -1,7 +1,7 @@
 #pragma once
 
 #include <sensor_msgs/msg/battery_state.hpp>
-#include "ROSArduinoCommunicator.h"
+#include "ROSArduinoCommunicator.hpp"
 
 class BatteryNode : public ROSArduinoCommunicator {
 public:

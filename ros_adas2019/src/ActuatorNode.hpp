@@ -3,7 +3,7 @@
 #include <std_msgs/msg/bool.hpp>
 #include <std_msgs/msg/float32.hpp>
 
-#include "ROSArduinoCommunicator.h"
+#include "ROSArduinoCommunicator.hpp"
 
 class ActuatorNode : public ROSArduinoCommunicator {
 public:

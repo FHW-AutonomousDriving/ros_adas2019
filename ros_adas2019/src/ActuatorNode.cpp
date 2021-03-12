@@ -1,6 +1,6 @@
 #include <chrono>
 
-#include "ActuatorNode.h"
+#include "ActuatorNode.hpp"
 
 ActuatorNode::ActuatorNode() : ROSArduinoCommunicator(ARDUINO_CENTER_ACTUATORS) {
 
