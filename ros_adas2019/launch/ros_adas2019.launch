@@ -1,18 +1,16 @@
 <launch>
      <group>
           <push-ros-namespace namespace="adas2019"/>
-          <node name="adas2019ActuatorNode" pkg="ros_adas2019" exec="Actuator" output="screen"/>
-          <node name="adas2019BatteryNode" pkg="ros_adas2019" exec="Battery" output="screen"/>
-          <node name="adas2019OdometryNode" pkg="ros_adas2019" exec="Odometry" output="screen"/>
-          <node name="adas2019UltrasonicNode" pkg="ros_adas2019" exec="Ultrasonic" output="screen"/>
+          <node pkg="ros_adas2019" name="Actuator" exec="Actuator" output="screen"/>
+          <node pkg="ros_adas2019" name="Battery" exec="Battery" output="screen"/>
+          <node pkg="ros_adas2019" name="Odometry" exec="Odometry" output="screen"/>
+          <node pkg="ros_adas2019" name="Ultrasonic" exec="Ultrasonic" output="screen"/>
      </group>
-     <!--
      <group>
-          <node name="uss_side_left_frame" pkg="tf2_ros" type="static_transform_publisher" args="0.255 0.15 0 0 0 0.7071068 0.7071068 base_link uss_side_left"/>
-          <node name="uss_rear_left_frame" pkg="tf2_ros" type="static_transform_publisher" args="-0.08 0.11 0 0 0 0.9659258 0.258819 base_link uss_rear_left"/>
-          <node name="uss_rear_center_frame" pkg="tf2_ros" type="static_transform_publisher" args="-0.1 0 0 0 0 1 0 base_link uss_rear_center"/>
-          <node name="uss_rear_right_frame" pkg="tf2_ros" type="static_transform_publisher" args="-0.08 -0.11 0 0 0 0.9659258 -0.258819 base_link uss_rear_right"/>
-          <node name="uss_side_right_frame" pkg="tf2_ros" type="static_transform_publisher" args="0.255 -0.15 0 0 0 -0.7071068 0.7071068 base_link uss_side_right"/>
+          <node pkg="tf2_ros" exec="static_transform_publisher" name="uss_side_left_frame" args="0.255 0.15 0 0 0 0.7071068 0.7071068 base_link uss_side_left"/>
+          <node pkg="tf2_ros" exec="static_transform_publisher" name="uss_rear_left_frame" args="-0.08 0.11 0 0 0 0.9659258 0.258819 base_link uss_rear_left"/>
+          <node pkg="tf2_ros" exec="static_transform_publisher" name="uss_rear_center_frame" args="-0.1 0 0 0 0 1 0 base_link uss_rear_center"/>
+          <node pkg="tf2_ros" exec="static_transform_publisher" name="uss_rear_right_frame" args="-0.08 -0.11 0 0 0 0.9659258 -0.258819 base_link uss_rear_right"/>
+          <node pkg="tf2_ros" exec="static_transform_publisher" name="uss_side_right_frame" args="0.255 -0.15 0 0 0 -0.7071068 0.7071068 base_link uss_side_right"/>
      </group>
-     -->
 </launch>
