@@ -1,4 +1,4 @@
-#include "ROSArduinoCommunicator.h"
+#include "ROSArduinoCommunicator.hpp"
 
 ROSArduinoCommunicator::ROSArduinoCommunicator(ARDUINO_ID arduinoId) : rclcpp::Node::Node("adas_2019") {
     if (!arduinoComClient.init(arduinoId, SERIAL_DEVICE_PREFIX, NUM_ARDUINO)) {

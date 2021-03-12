@@ -1,7 +1,7 @@
 #pragma once
 
 #include <sensor_msgs/msg/range.hpp>
-#include "ROSArduinoCommunicator.h"
+#include "ROSArduinoCommunicator.hpp"
 
 class UltrasonicNode: public ROSArduinoCommunicator {
 public:

@@ -1,4 +1,4 @@
-#include "OdometryNode.h"
+#include "OdometryNode.hpp"
 
 OdometryNode::OdometryNode() : ROSArduinoCommunicator(ARDUINO_REAR_IMU_WHEELENC) {
     odometryIMUPublisher = this->create_publisher<ros_adas2019::msg::Imu>("odometry/imu", 10);

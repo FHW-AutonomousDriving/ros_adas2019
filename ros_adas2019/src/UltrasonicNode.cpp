@@ -1,4 +1,4 @@
-#include "UltrasonicNode.h"
+#include "UltrasonicNode.hpp"
 
 UltrasonicNode::UltrasonicNode() : ROSArduinoCommunicator(ARDUINO_REAR_US) {
 
