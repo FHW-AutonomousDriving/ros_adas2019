@@ -11,7 +11,7 @@ ActuatorNode::ActuatorNode() : ROSArduinoCommunicator(ARDUINO_CENTER_ACTUATORS) 
     actuatorSpeedSubscriber = this->create_subscription<std_msgs::msg::Float32>("actuator/speed", 1, 
 		std::bind(&ActuatorNode::onSpeedUpdate, this, std::placeholders::_1)
     );
-    actuatorSteeringSubscriber = this->create_subscription<std_msgs::msg::Float32>("actuator/speed", 1, 
+    actuatorSteeringSubscriber = this->create_subscription<std_msgs::msg::Float32>("actuator/steering", 1, 
 		std::bind(&ActuatorNode::onSteeringUpdate, this, std::placeholders::_1)
     );
 
