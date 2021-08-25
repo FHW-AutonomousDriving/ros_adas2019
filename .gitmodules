@@ -4,3 +4,6 @@
 [submodule "rplidar"]
 	path = rplidar
 	url = https://github.com/allenh1/rplidar_ros.git
+[submodule "pylon_instant_camera"]
+	path = pylon_instant_camera
+	url = https://github.com/fhwedel-hoe/pylon_instant_camera.git

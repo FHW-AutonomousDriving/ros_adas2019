@@ -31,25 +31,31 @@ def generate_launch_description():
     
     """Use composition for all image-processing nodes.
     
-    Keeps overhead low sine image data can reside in shared memory."""
+    Keeps overhead low since image data can – theoretically – reside in shared memory."""
     image_processing = ComposableNodeContainer(
-            name='image_processing',
-            namespace='pylon_camera_node',
-            package='rclcpp_components',
-            executable='component_container',
-            composable_node_descriptions=[
+            name = 'container',
+            namespace = 'pylon_camera_node',
+            package = 'rclcpp_components',
+            executable = 'component_container',
+            composable_node_descriptions = [
                 ComposableNode(
-					name='pylon_camera',
-					namespace='pylon_camera_node',
-                    package='pylon_usb_instant_camera',
-                    plugin='pylon_usb_instant_camera::PylonUSBCameraNode'),
+                    name = 'pylon_camera',
+                    namespace = 'pylon_camera_node',
+                    package = 'pylon_instant_camera',
+                    plugin = 'pylon_instant_camera::PylonCameraNode',
+                    parameters = [
+                        {'camera_settings_pfs': get_package_share_directory('ros_adas2019')+'/config/rgb8.pfs'},
+                        {'camera_info_yaml': get_package_share_directory('ros_adas2019')+'/config/front_camera_calibration.yaml'}
+                        ]
+                ),
                 ComposableNode(
-					name='pylon_camera_rectify',
-					namespace='pylon_camera_node',
-                    package='image_proc',
-                    plugin='image_proc::RectifyNode')
+                    name = 'pylon_camera_rectify',
+                    namespace = 'pylon_camera_node',
+                    package = 'image_proc',
+                    plugin = 'image_proc::RectifyNode'
+                )
             ],
-            output='screen',
+            output = 'screen'
     )
 
     return launch.LaunchDescription([ros_adas2019, rplidar, laser_tf, image_processing])
