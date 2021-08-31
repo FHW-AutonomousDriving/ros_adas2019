@@ -26,7 +26,7 @@ def generate_launch_description():
         namespace = 'lidar',
         package = 'tf2_ros', 
         executable = "static_transform_publisher",
-        arguments = "0.45 0 0 0 0 1 0 base_link laser".split()
+        arguments = "0.45 0 0 0 1 0 0 base_link laser_frame".split()
     )
     
     """Use composition for all image-processing nodes.
@@ -43,7 +43,10 @@ def generate_launch_description():
                     namespace = 'pylon_camera_node',
                     package = 'pylon_instant_camera',
                     plugin = 'pylon_instant_camera::PylonCameraNode',
-                    parameters = [{'camera_settings_pfs': get_package_share_directory('ros_adas2019')+'/config/rgb8.pfs'}]
+                    parameters = [
+                        {'camera_settings_pfs': get_package_share_directory('ros_adas2019')+'/config/rgb8.pfs'},
+                        {'camera_info_yaml': get_package_share_directory('ros_adas2019')+'/config/front_camera_calibration.yaml'}
+                        ]
                 ),
                 ComposableNode(
                     name = 'pylon_camera_rectify',
