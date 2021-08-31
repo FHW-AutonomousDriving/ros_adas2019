@@ -21,8 +21,8 @@ def generate_launch_description():
         executable = 'rplidar_composition',
         output = 'screen'
     )
-    laser_frame = Node(
-        name = 'laser_frame',
+    laser_tf = Node(
+        name = 'laser_tf',
         namespace = 'lidar',
         package = 'tf2_ros', 
         executable = "static_transform_publisher",
@@ -58,4 +58,4 @@ def generate_launch_description():
             output = 'screen'
     )
 
-    return launch.LaunchDescription([rplidar, laser_frame, image_processing, ros_adas2019])
+    return launch.LaunchDescription([rplidar, laser_tf, image_processing, ros_adas2019])
