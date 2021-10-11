@@ -58,4 +58,4 @@ def generate_launch_description():
             output = 'screen'
     )
 
-    return launch.LaunchDescription([rplidar, laser_tf, image_processing, ros_adas2019])
+    return launch.LaunchDescription([ros_adas2019, rplidar, laser_tf, image_processing])
