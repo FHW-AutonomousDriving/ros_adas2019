@@ -19,6 +19,9 @@ def generate_launch_description():
         namespace = 'lidar',
         package = 'rplidar_ros',
         executable = 'rplidar_composition',
+        parameters = [
+            {'angle_compensate': True}
+        ],
         output = 'screen'
     )
     laser_tf = Node(
