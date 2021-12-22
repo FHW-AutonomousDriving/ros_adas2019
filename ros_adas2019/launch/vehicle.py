@@ -20,7 +20,8 @@ def generate_launch_description():
         package = 'rplidar_ros',
         executable = 'rplidar_composition',
         parameters = [
-            {'angle_compensate': True}
+            {'angle_compensate': True},
+            {'inverted': True}
         ],
         output = 'screen'
     )
