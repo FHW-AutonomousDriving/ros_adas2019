@@ -20,6 +20,7 @@ def generate_launch_description():
         package = 'rplidar_ros',
         executable = 'rplidar_composition',
         parameters = [
+            {'frame_id': 'laser_frame'},
             {'angle_compensate': True}
         ],
         output = 'screen'
