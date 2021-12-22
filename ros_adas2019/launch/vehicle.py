@@ -17,8 +17,8 @@ def generate_launch_description():
     rplidar = Node(
         name = 'rplidar',
         namespace = 'lidar',
-        package = 'rplidar_ros',
-        executable = 'rplidar_composition',
+        package = 'rplidar_ros2',
+        executable = 'rplidar_scan_publisher',
         parameters = [
             {'angle_compensate': True},
             {'inverted': True}
