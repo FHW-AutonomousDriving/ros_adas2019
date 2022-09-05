@@ -1,5 +1,8 @@
 #include "OdometryNode.hpp"
 
+static const double default_wheel_circumference = 0.34;
+static const int default_encoder_ticks_per_revolution = 60;
+
 OdometryNode::OdometryNode() : ROSArduinoCommunicator(ARDUINO_REAR_IMU_WHEELENC) {
     odometryIMUPublisher = this->create_publisher<ros_adas2019::msg::Imu>("odometry/imu", 10);
     odometryOverallSpeedPublisher = this->create_publisher<std_msgs::msg::Float32>("odometry/speed", 1);
@@ -9,8 +12,8 @@ OdometryNode::OdometryNode() : ROSArduinoCommunicator(ARDUINO_REAR_IMU_WHEELENC)
     odometryRightWheelSpeedPublisher = this->create_publisher<std_msgs::msg::Float32>("odometry/wheel_right/speed", 1);
     odometryRightWheelDistancePublisher = this->create_publisher<std_msgs::msg::Float32>("odometry/wheel_right/distance", 1);
     
-    this->declare_parameter<double>("wheel_circumference", 0.34); // the wheel circumference in meter[sic]
-    this->declare_parameter<int>("encoder_ticks_per_revolution", 60); // the number of steps per wheel revolution (one turn)
+    this->declare_parameter<double>("wheel_circumference", default_wheel_circumference); // the wheel circumference in meter[sic]
+    this->declare_parameter<int>("encoder_ticks_per_revolution", default_encoder_ticks_per_revolution); // the number of steps per wheel revolution (one turn)
 }
 
 void OdometryNode::onDataReceived(SENSOR_ID sensorId, uint32_t timestamp, tDataUnion data) {
@@ -33,11 +36,11 @@ void OdometryNode::onDataReceived(SENSOR_ID sensorId, uint32_t timestamp, tDataU
 double OdometryNode::calculateDistance(uint32_t wheelTach, uint32_t lastWheelTach) {
     if ((wheelTach == 0) || (lastWheelTach == 0)) return 0;
 
-	// get volatile parameters
-	// TODO: cache and get lonly on update?
-    double wheel_circumference;
+    // get volatile parameters
+    // TODO: cache and get only on update?
+    double wheel_circumference = default_wheel_circumference;
     this->get_parameter("wheel_circumference", wheel_circumference);
-    int encoder_ticks_per_revolution;
+    int encoder_ticks_per_revolution = default_encoder_ticks_per_revolution;
     this->get_parameter("encoder_ticks_per_revolution", encoder_ticks_per_revolution);
 
     uint32_t ticks;

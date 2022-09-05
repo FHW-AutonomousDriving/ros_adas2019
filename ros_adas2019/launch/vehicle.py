@@ -30,7 +30,7 @@ def generate_launch_description():
         namespace = 'lidar',
         package = 'tf2_ros', 
         executable = "static_transform_publisher",
-        arguments = "0.45 0 0 0 1 0 0 base_link laser_frame".split()
+        arguments = "--x 0.45 --y 0 --z 0 --qx 0 --qy 1 --qz 0 --qw 0 --frame-id base_link --child-frame-id laser_frame".split()
     )
     
     """Use composition for all image-processing nodes.
