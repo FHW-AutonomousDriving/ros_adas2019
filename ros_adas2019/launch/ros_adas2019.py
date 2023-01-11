@@ -2,6 +2,7 @@
 
 import launch
 from launch_ros.actions import Node
+from launch.actions import LogInfo, Shutdown
 
 def generate_launch_description():
 
@@ -70,7 +71,16 @@ def generate_launch_description():
         arguments = "--x 0.255 --y -0.15 --z 0 --qx 0 --qy 0 --qz -0.7071068 --qw 0.7071068 --frame-id base_link --child-frame-id uss_side_right".split()
     )
 
-    return launch.LaunchDescription([
+    ld = launch.LaunchDescription([
         Actuator, Battery, Odometry, Ultrasonic,
         uss_side_left_tf, uss_rear_left_tf, uss_rear_center_tf, uss_rear_right_tf, uss_side_right_tf
         ])
+    ld.add_action(launch.actions.RegisterEventHandler(
+        event_handler = launch.event_handlers.OnProcessExit(
+            on_exit = [
+                LogInfo(msg = ["A node has died. Stopping everything..."]),
+                Shutdown(reason='Shutting down because of node termination.')
+            ]
+        )
+    ))
+    return ld
