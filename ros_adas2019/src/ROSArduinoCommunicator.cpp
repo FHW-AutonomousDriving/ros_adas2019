@@ -31,7 +31,7 @@ ROSArduinoCommunicator::~ROSArduinoCommunicator() {
     arduinoComClient.end();
 }
 
-void ROSArduinoCommunicator::triggerUpdate() {
+bool ROSArduinoCommunicator::triggerUpdate() {
     std::vector<uint8_t> frame;
 
     if (arduinoComClient.get_next_frame(frame)) {
@@ -58,13 +58,17 @@ void ROSArduinoCommunicator::triggerUpdate() {
                 RCLCPP_ERROR(this->get_logger(),
                     "Error frame received from unit: %d", arduinoComClient.get_id()
                 );
+                // TODO: add error handler
             break;
 
             default:
                 onDataReceived(id, timestamp, data);
             break;
         }
-    }
+        return true;
+    } else {
+		return false;
+	}
 }
 
 void ROSArduinoCommunicator::sendSteering(float angle) {

@@ -11,7 +11,7 @@ public:
     ROSArduinoCommunicator(ARDUINO_ID arduinoId);
     ~ROSArduinoCommunicator();
 
-    void triggerUpdate();
+    bool triggerUpdate();
 
 private:
     arduino_com_client arduinoComClient;

@@ -188,12 +188,17 @@ int main(int argc, char **argv) {
     rclcpp::init(argc, argv);
     auto node = std::make_shared<OdometryNode>();
 
-    rclcpp::Rate poll_rate(120);
-
+	int error_count = 0;
+    rclcpp::Rate poll_rate(80); // odometry cannot operate faster
     while (rclcpp::ok()) {
         rclcpp::spin_some(node);
-        node->triggerUpdate();
-
+        error_count += !node->triggerUpdate();
+        if (error_count > 5) {
+			RCLCPP_ERROR(node->get_logger(),
+				"Too many missing frames"
+			);
+			rclcpp::shutdown();
+		}
         poll_rate.sleep();
     }
 
