@@ -25,7 +25,8 @@ def generate_launch_description():
         namespace = 'adas2019',
         package = 'ros_adas2019',
         executable = 'Odometry',
-        output = 'screen'
+        output = 'screen',
+        parameters = [{'poll_rate_hz': 80}]
     )
     Ultrasonic = Node(
         name = 'Ultrasonic',
@@ -34,7 +35,7 @@ def generate_launch_description():
         executable = 'Ultrasonic',
         output = 'screen'
     )
-    
+
     uss_side_left_tf = Node(
         name = 'uss_side_left_tf',
         namespace = 'adas2019',

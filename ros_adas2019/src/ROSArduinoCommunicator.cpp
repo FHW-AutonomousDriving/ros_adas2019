@@ -67,8 +67,8 @@ bool ROSArduinoCommunicator::triggerUpdate() {
         }
         return true;
     } else {
-		return false;
-	}
+        return false;
+    }
 }
 
 void ROSArduinoCommunicator::sendSteering(float angle) {

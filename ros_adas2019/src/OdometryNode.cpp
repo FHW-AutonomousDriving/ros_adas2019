@@ -188,18 +188,23 @@ int main(int argc, char **argv) {
     rclcpp::init(argc, argv);
     auto node = std::make_shared<OdometryNode>();
 
-	int error_count = 0;
-    rclcpp::Rate poll_rate(80); // odometry cannot operate faster
+    int error_count = 0;
+    int poll_rate_hz = 80; // on carla, maximum frequency seems to be 80 Hz
+    node->declare_parameter<int>("poll_rate_hz", poll_rate_hz);
+    node->get_parameter("poll_rate_hz", poll_rate_hz);
+    RCLCPP_INFO(node->get_logger(), "Polling Arduino at %d Hz.", poll_rate_hz);
+    rclcpp::Rate poller(poll_rate_hz);
     while (rclcpp::ok()) {
         rclcpp::spin_some(node);
-        error_count += !node->triggerUpdate();
-        if (error_count > 5) {
-			RCLCPP_ERROR(node->get_logger(),
-				"Too many missing frames"
-			);
-			rclcpp::shutdown();
-		}
-        poll_rate.sleep();
+        if (!node->triggerUpdate()) {
+            RCLCPP_WARN(node->get_logger(), "Unable to receive frame from Arduino.");
+            error_count += 1;
+            if (error_count > 10) {
+                RCLCPP_ERROR(node->get_logger(), "Too many missing frames.");
+                rclcpp::shutdown();
+            }
+        }
+        poller.sleep();
     }
 
     return 0;
