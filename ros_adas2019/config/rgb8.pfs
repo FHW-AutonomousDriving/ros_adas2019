@@ -2,10 +2,10 @@
 # GenApi persistence file (version 3.1.0)
 # Device = Basler::UsbCameraParams -- Basler USB3Vision camera interface -- Device version = 1.0.0 -- Product GUID = 71351C50-4DDC-4D3B-BDF7-0D1539FEFD30 -- Product version GUID = 69D3B11D-28C0-48EE-90BB-86FADE264D4D
 GainSelector	All
-GainRaw	54
+GainRaw	72
 GainAuto	Continuous
-AutoGainLowerLimitRaw	32
-AutoGainUpperLimitRaw	54
+AutoGainLowerLimitRaw	64
+AutoGainUpperLimitRaw	161
 Width	1280
 Height	960
 OffsetX	0
@@ -22,5 +22,6 @@ ExposureTimeRaw	13370
 ExposureAuto	Off
 TriggerMode	Off
 AcquisitionFramePeriodRaw	25000
-LightSourcePreset	Daylight5000K
+LightSourcePreset	Off
 BalanceWhiteAuto	Off
+DeviceLinkThroughputLimitMode	Off
