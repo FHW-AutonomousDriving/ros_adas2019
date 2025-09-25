@@ -37,33 +37,16 @@ def generate_launch_description():
         arguments = "--x 0.45 --y 0 --z 0 --qx 0 --qy 1 --qz 0 --qw 0 --frame-id base_link --child-frame-id laser_frame".split()
     )
     
-    """Use composition for all image-processing nodes.
-    
-    Keeps overhead low since image data can – theoretically – reside in shared memory."""
-    image_processing = ComposableNodeContainer(
-            name = 'container',
-            namespace = 'pylon_camera_node',
-            package = 'rclcpp_components',
-            executable = 'component_container',
-            composable_node_descriptions = [
-                ComposableNode(
-                    name = 'pylon_camera',
-                    namespace = 'pylon_camera_node',
-                    package = 'pylon_instant_camera',
-                    plugin = 'pylon_instant_camera::PylonCameraNode',
-                    parameters = [
-                        {'camera_settings_pfs': get_package_share_directory('ros_adas2019')+'/config/rgb8.pfs'},
-                        {'camera_info_yaml': get_package_share_directory('ros_adas2019')+'/config/front_camera_calibration.yaml'}
-                        ]
-                ),
-                ComposableNode(
-                    name = 'pylon_camera_rectify',
-                    namespace = 'pylon_camera_node',
-                    package = 'image_proc',
-                    plugin = 'image_proc::RectifyNode'
-                )
-            ],
-            output = 'screen'
+    pylon_camera = Node(
+        name = 'pylon_camera',
+        namespace = 'pylon_camera_node',
+        package = 'pylon_instant_camera',
+        executable = 'node',
+        parameters = [{
+            'camera_settings_pfs': get_package_share_directory('ros_adas2019')+'/config/rgb8.pfs',
+            'camera_info_yaml': get_package_share_directory('ros_adas2019')+'/config/front_camera_calibration.yaml'
+        }],
+        output = 'screen'
     )
 
-    return launch.LaunchDescription([ros_adas2019, rplidar, laser_tf, image_processing])
+    return launch.LaunchDescription([ros_adas2019, rplidar, laser_tf, pylon_camera])
