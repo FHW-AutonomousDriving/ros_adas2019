@@ -40,11 +40,11 @@ def generate_launch_description():
     pylon_camera = Node(
         name = 'pylon_camera',
         namespace = 'pylon_camera_node',
-        package = 'pylon_instant_camera',
-        executable = 'node',
+        package = 'pylon_ros2_camera_wrapper',
+        executable = 'pylon_ros2_camera_wrapper',
         parameters = [{
-            'camera_settings_pfs': get_package_share_directory('ros_adas2019')+'/config/rgb8.pfs',
-            'camera_info_yaml': get_package_share_directory('ros_adas2019')+'/config/front_camera_calibration.yaml'
+            'startup_user_set': 'Default',
+            'frame_rate': 45.0
         }],
         output = 'screen'
     )
